@@ -1,0 +1,6 @@
+---
+- name: deploy and start
+  hosts: app-runner
+  roles:
+    - nginx
+    - run_script
