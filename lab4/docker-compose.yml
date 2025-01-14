@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ci_network
+    entrypoint: >
+      /bin/sh -c "
+      if ! command -v docker &> /dev/null; then
+        apt-get update && 
+        apt-get install -y docker.io;
+      fi;
+      /usr/bin/tini -- /usr/local/bin/jenkins.sh"
+
+  postgres-db:
+    image: postgres:15
+    env_file:
+      - env/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  sonarqube:
+    image: sonarqube:9.9-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - ci_network
+
+  springboot-app:
+    build:
+      context: ./springboot-app
+    image: user/springboot-app
+    depends_on:
+      - postgres-db
+    ports:
+      - "8081:8080"
+    env_file:
+      - env/.env
+networks:
+  ci_network:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  postgres_data:
