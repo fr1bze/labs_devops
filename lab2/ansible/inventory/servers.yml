@@ -1,6 +1,6 @@
 all:
   hosts:
-    app-runner:
-      ansible_host: app-runner
+    lab2-app-runner-1:
+      ansible_host: lab2-app-runner-1
       ansible_user: root
       ansible_python_interpreter: /usr/bin/python3
