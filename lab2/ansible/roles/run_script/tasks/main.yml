@@ -1,0 +1,17 @@
+---
+- name: shell script copy
+  copy:
+    src: app/laba1.sh
+    dest: /usr/local/bin/laba1.sh
+    mode: '0755'
+
+- name: setting permissions
+  file:
+    path: /usr/local/bin/laba1.sh
+    mode: '0755'
+
+- name: script start
+  shell: |
+    /usr/local/bin/laba1.sh START
+  args:
+    executable: /bin/bash
